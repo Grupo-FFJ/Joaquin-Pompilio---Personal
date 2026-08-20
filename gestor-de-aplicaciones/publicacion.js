@@ -1,3 +1,4 @@
+import { Usuario } from "./usuario.js";
 export class Publicacion{
     //es para los types
     titulo
@@ -9,18 +10,18 @@ export class Publicacion{
     constructor(titulo,descripcion,autor){
         this.titulo = titulo
         this.descripcion = descripcion
-        this.autor = autor
+        this.autor = autor //es un objeto tipo usuario
         this.fechaPublicacion = new Date()
         this.activa = true
 
     }
     mostrarResumen() {
-        return this.titulo+" "+this.descripcion+" "+this.autor
+        return this.titulo+" "+this.descripcion+" "+this.autor.nombre
     }
     estaActiva() {
         return this.activa
     }
     esDeAutor(nombre) {
-        return this.autor === nombre
+        return this.autor.nombre === nombre
     }
 }
