@@ -80,7 +80,7 @@ let publicacionesConUsuario = publicacionesArreglo.buscarPorUsuario("carniceria 
 console.log(publicacionesConUsuario)
 console.log("El nombre coincide con: "+publicacionesConUsuario.length)
 
-//extra
+//extra<
 console.log("Extras!")
 let publicacionesActivas = publicacionesArreglo.filtrarActivas()
 console.log(publicacionesActivas)
