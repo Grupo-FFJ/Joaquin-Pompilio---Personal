@@ -97,3 +97,46 @@ console.log("Coincidencias con carniceria borjes:", publicacionesConUsuario.leng
 let publicacionesActivasRepo = publicacionesArreglo.filtrarActivas();
 console.log("Activas en repositorio:", publicacionesActivasRepo.length);
 console.log("Cantidad total:", publicacionesArreglo.cantidadTotal());
+
+
+console.log("-------------------------------")
+console.log("---------Probando Agregar y buscar Por usuario----------")
+console.log("///////////Cree otro repositorio de publicaiones para probar///////////")
+const repo = new RepositorioPublicaciones();
+
+// Un mismo usuario con publicaciones de venta y servicio
+const usuario4 = new Usuario("carniceria borjes", "borjes@test.com");
+const usuario5 = new Usuario("Juan Lopez", "juan@test.com");
+
+// agregando publicaiones con agregar()
+repo.agregar(new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200));
+repo.agregar(new PublicacionServicio("Corte de Pelo", "A domicilio", usuario4, "Presencial", 45));
+repo.agregar(new PublicacionVenta("Pizzetas", "Integrales", usuario5, 800));
+repo.agregar(new PublicacionServicio("Clase de Programacion", "JS Avanzado", usuario4, "Online", 60));
+
+console.log("--- Buscar por usuario: carniceria borjes ---");
+const publicacionesBorjes = repo.buscarPorUsuario("carniceria borjes");
+console.log(`Encontradas: ${publicacionesBorjes.length}`);
+publicacionesBorjes.forEach(pub => console.log(`- ${pub.titulo} (${pub.constructor.name})`)); //pub.constructor.name == esto devuelve el nombre de la clase a la que llama
+
+// 3. Probar el desafío: listarPorTipo()
+console.log("--- Solo PublicacionVenta ---");
+const soloVentas = repo.listarPorTipo(PublicacionVenta);
+soloVentas.forEach(pub => console.log(`- ${pub.titulo} | Precio: $${pub.precio}`));
+
+console.log("--- Solo PublicacionServicio ---");
+const soloServicios = repo.listarPorTipo(PublicacionServicio);
+soloServicios.forEach(pub => console.log(`- ${pub.titulo} | Modalidad: ${pub.modalidad}`));
+/*
+Autoevaluación de cierre
+Respondan individualmente antes de guardar su trabajo:
+● ¿Qué le pasa a PublicacionVenta si Publicacion agrega mañana un nuevo atributo en
+su constructor?
+heredara ese nuevo atributo, pero para poder darle un valor al instanciarla, habra que actualizar su propio constructor agregando ese parametro y pasandolo dentro de la llamada a super(..)
+
+● ¿Qué diferencia hay entre agregar un atributo directamente en PublicacionVenta y
+agregarlo en Publicacion?
+en publicacion, el atributo pasa a ser compartido por todas las subclases, mientras que en PublicionVenta, el atributo es solo de esa clase y sus hijos.
+
+● ¿Qué me quedó menos claro de esta clase? */
+//el uso de instanceoff, super() y la diferencia entre declarar atributos y usarlos con this

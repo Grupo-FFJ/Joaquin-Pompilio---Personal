@@ -9,6 +9,9 @@ export class RepositorioPublicaciones{
         const arregloConUsuario = this.arreglo.filter(publicacion => publicacion.autor.nombre == nombre);
         return arregloConUsuario
     }
+    listarPorTipo(claseConstructor) {
+        return this.arreglo.filter(publicacion => publicacion instanceof claseConstructor);
+    }
     filtrarActivas() {
         const arregloConActivas = this.arreglo.filter(publicacion => publicacion.activa == true)
         return arregloConActivas   
