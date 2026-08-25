@@ -1,14 +1,11 @@
-class PublicacionServicio extends publicacion {
-    titulo
-    descripcion
-    autor
-    fechaPublicacion
-    activa
-    precio
-    stock
+import { Publicacion } from "./publicacion.js";
+export class PublicacionServicio extends Publicacion {
+    modalidad
+    duracionMinutos
     //
-    constructor(titulo,descripcion,autor,precio){
+    constructor(titulo,descripcion,autor,modalidad,duracionMinutos){
         super(titulo,descripcion,autor);
-        this.precio = precio
+        this.modalidad = modalidad
+        this.duracionMinutos = duracionMinutos
     }
 }

@@ -1,4 +1,4 @@
-class Publicacion{
+export class Publicacion{
     //es para los types
     titulo
     descripcion
