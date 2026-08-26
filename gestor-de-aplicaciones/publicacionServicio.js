@@ -8,4 +8,8 @@ export class PublicacionServicio extends Publicacion {
         this.modalidad = modalidad
         this.duracionMinutos = duracionMinutos
     }
+        mostrarResumen() {
+        const resumenPadre = super.mostrarResumen()
+        return `${resumenPadre} modalidad: ${this.modalidad} duracion: ${this.duracionMinutos}`
+    }
 }
