@@ -19,4 +19,12 @@ export class RepositorioPublicaciones{
     cantidadTotal() {
         return this.arreglo.length
     }
+    listaResumenes() {
+        const mapaResumenes = this.arreglo.map(publicacion => publicacion.mostrarResumen())
+        return mapaResumenes
+    }
+    filtrarPorTipo(claseConstructor) {
+        const publicaciones = this.arreglo.filter(p => p instanceof claseConstructor)
+        return publicaciones
+    }
 }

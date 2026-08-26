@@ -145,3 +145,6 @@ en publicacion, el atributo pasa a ser compartido por todas las subclases, mient
 instanceof: */
 console.log("----------------------------------")
 repo.arreglo.forEach(p => console.log(p.mostrarResumen()))
+
+console.log(repo.listaResumenes())
+console.log(repo.filtrarPorTipo(PublicacionVenta))
