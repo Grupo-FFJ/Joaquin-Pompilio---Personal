@@ -140,3 +140,8 @@ en publicacion, el atributo pasa a ser compartido por todas las subclases, mient
 
 ● ¿Qué me quedó menos claro de esta clase? */
 //el uso de instanceoff, super() y la diferencia entre declarar atributos y usarlos con this
+
+/*En main.js, recorran el array mixto de publicaciones con un solo forEach, sin ningún if ni
+instanceof: */
+console.log("----------------------------------")
+repo.arreglo.forEach(p => console.log(p.mostrarResumen()))
