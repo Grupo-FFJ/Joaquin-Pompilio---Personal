@@ -8,4 +8,9 @@ export class PublicacionVenta extends Publicacion {
         this.precio = precio
         this.stock = 1
     }
+    mostrarResumen() {
+        const resumenPadre = super.mostrarResumen()
+        return `${resumenPadre} precio: ${this.precio}`
+    }
+    
 }
