@@ -7,6 +7,7 @@ export class RepositorioPublicaciones extends EventEmitter{
     }
     agregar(publicacion) {
         this.arreglo.push(publicacion)
+        this.emit("publicacionAgregada", publicacion);
     }
     buscarPorUsuario(nombre) {
         const arregloConUsuario = this.arreglo.filter(publicacion => publicacion.autor.nombre == nombre);
