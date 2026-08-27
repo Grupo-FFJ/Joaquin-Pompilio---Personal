@@ -31,4 +31,11 @@ export class RepositorioPublicaciones extends EventEmitter{
         const publicaciones = this.arreglo.filter(p => p instanceof claseConstructor)
         return publicaciones
     }
+    publicarConDemora(publicacion, callback) {
+        setTimeout(() => {
+            this.agregar(publicacion)
+            callback("Publicando con delay")
+        },5000
+        )
+    }
 }

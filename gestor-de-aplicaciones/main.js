@@ -116,6 +116,8 @@ repo.on("publicacionAgregada", () => {
 });
  // dispara los dos listeners, en orden
 
+
+
 // Un mismo usuario con publicaciones de venta y servicio
 const usuario4 = new Usuario("carniceria borjes", "borjes@test.com");
 const usuario5 = new Usuario("Juan Lopez", "juan@test.com");
@@ -165,3 +167,6 @@ console.log("----------------------------------")
 console.log("-------------COMPROBANDO REGLAS----------------")
 const regla = new Regla(2, 50, 2)
 console.log(validarPublicacion(repo.arreglo[2], regla))
+
+//Agregando eventos con delay
+repo.publicarConDemora(new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200),console.log);
