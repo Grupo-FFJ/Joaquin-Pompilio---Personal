@@ -3,6 +3,8 @@ import { Usuario } from "./usuario.js";
 import { RepositorioPublicaciones } from "./RepositorioPublicaciones.js";
 import { PublicacionVenta} from "./publicacionVenta.js"
 import { PublicacionServicio} from "./publicacionServicio.js"
+import { Regla } from "./regla.js"
+import { validarPublicacion } from "./validaciones.js"
 
 let usuario1 = new Usuario("carniceria borjes","asda@jimijimol.com")
 let usuario2 = new Usuario("carniceria milan","asda@jimijimol.com")
@@ -148,3 +150,8 @@ repo.arreglo.forEach(p => console.log(p.mostrarResumen()))
 
 console.log(repo.listaResumenes())
 console.log(repo.filtrarPorTipo(PublicacionVenta))
+
+console.log("----------------------------------")
+console.log("-------------COMPROBANDO REGLAS----------------")
+const regla = new Regla(2,50,2)
+console.log(validarPublicacion(repo.arreglo[2],regla))
