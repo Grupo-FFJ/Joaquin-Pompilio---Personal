@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+//import { setTimeout } from "node:timers/promises";
 
 export class RepositorioPublicaciones extends EventEmitter{
     constructor(){
@@ -31,11 +32,25 @@ export class RepositorioPublicaciones extends EventEmitter{
         const publicaciones = this.arreglo.filter(p => p instanceof claseConstructor)
         return publicaciones
     }
-    publicarConDemora(publicacion, callback) {
+        publicarConDemora(publicacion, callback) {
         setTimeout(() => {
             this.agregar(publicacion)
             callback("Publicando con delay")
         },5000
         )
     }
+    /*
+    publicarConDemoraAsync(publicacion) {
+        return new Promise((resolve) => {
+            console.log("Procesando publicacion ...")
+            setTimeout(() => {
+                resolve(publicacion)
+            },2000);
+        }) }
+   /* async function main() {
+        const publicacion = await.publicarConDemoraAsync(p3)
+        repositorio.agregar(publicacion);
+        console.log("esto es lo que se imprime despues de la demora")
+        
+    }*/
 }
