@@ -1,14 +1,14 @@
 import { Publicacion } from "./publicacion.js";
 import { Usuario } from "./usuario.js";
 import { RepositorioPublicaciones } from "./RepositorioPublicaciones.js";
-import { PublicacionVenta} from "./publicacionVenta.js"
-import { PublicacionServicio} from "./publicacionServicio.js"
+import { PublicacionVenta } from "./publicacionVenta.js"
+import { PublicacionServicio } from "./publicacionServicio.js"
 import { Regla } from "./regla.js"
 import { validarPublicacion } from "./validaciones.js"
 
-let usuario1 = new Usuario("carniceria borjes","asda@jimijimol.com")
-let usuario2 = new Usuario("carniceria milan","asda@jimijimol.com")
-let usuario3 = new Usuario("carniceria borjes","asda@jimijimol.com")
+let usuario1 = new Usuario("carniceria borjes", "asda@jimijimol.com")
+let usuario2 = new Usuario("carniceria milan", "asda@jimijimol.com")
+let usuario3 = new Usuario("carniceria borjes", "asda@jimijimol.com")
 
 
 let arreglo = [
@@ -105,6 +105,18 @@ console.log("-------------------------------")
 console.log("---------Probando Agregar y buscar Por usuario----------")
 console.log("///////////Cree otro repositorio de publicaiones para probar///////////")
 const repo = new RepositorioPublicaciones();
+//agregando eventos
+repo.on("publicacionAgregada", (p) => {
+    console.log(`Nueva publicación: ${p.mostrarResumen()}`);
+});
+let cont = 0;
+repo.on("publicacionAgregada", () => {
+    cont++;
+    console.log(`Van ${cont} publicaciones en total`);
+});
+ // dispara los dos listeners, en orden
+
+
 
 // Un mismo usuario con publicaciones de venta y servicio
 const usuario4 = new Usuario("carniceria borjes", "borjes@test.com");
@@ -153,5 +165,19 @@ console.log(repo.filtrarPorTipo(PublicacionVenta))
 
 console.log("----------------------------------")
 console.log("-------------COMPROBANDO REGLAS----------------")
-const regla = new Regla(2,50,2)
-console.log(validarPublicacion(repo.arreglo[2],regla))
+const regla = new Regla(2, 50, 2)
+console.log(validarPublicacion(repo.arreglo[2], regla))
+
+//Agregando eventos con delay
+console.log("agregando evento con delay")
+repo.publicarConDemora(new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200),console.log);
+//anda, pero tengo sacar el import: import { setTimeout } from "node:timers/promises"; de repositorioPublicaciones
+
+//usando async, imitando comportamiento anterior.
+let publicacionMagica = new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200) 
+async function main() {
+        const publicacion = await repo.publicarConDemoraAsync(publicacionMagica)
+        repo.agregar(publicacion);
+        console.log("esto es lo que se imprime despues de la demora, con promises")
+}
+main()

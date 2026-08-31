@@ -1,9 +1,14 @@
-export class RepositorioPublicaciones{
+import { EventEmitter } from "node:events";
+
+
+export class RepositorioPublicaciones extends EventEmitter{
     constructor(){
+        super()
         this.arreglo = []
     }
     agregar(publicacion) {
         this.arreglo.push(publicacion)
+        this.emit("publicacionAgregada", publicacion);
     }
     buscarPorUsuario(nombre) {
         const arregloConUsuario = this.arreglo.filter(publicacion => publicacion.autor.nombre == nombre);
@@ -27,4 +32,19 @@ export class RepositorioPublicaciones{
         const publicaciones = this.arreglo.filter(p => p instanceof claseConstructor)
         return publicaciones
     }
+    publicarConDemora(publicacion, callback) {
+        setTimeout(() => {
+            this.agregar(publicacion)
+            callback("Publicando con delay")
+        },5000
+        )
+    }
+    
+    publicarConDemoraAsync(publicacion) {
+        return new Promise((resolve) => {
+            console.log("Procesando publicacion ...")
+            setTimeout(() => {
+                resolve(publicacion)
+            },2000);
+        }) }
 }
