@@ -170,3 +170,4 @@ console.log(validarPublicacion(repo.arreglo[2], regla))
 
 //Agregando eventos con delay
 repo.publicarConDemora(new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200),console.log);
+//anda, pero tengo sacar el import: import { setTimeout } from "node:timers/promises"; de repositorioPublicaciones
