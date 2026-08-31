@@ -169,5 +169,15 @@ const regla = new Regla(2, 50, 2)
 console.log(validarPublicacion(repo.arreglo[2], regla))
 
 //Agregando eventos con delay
+console.log("agregando evento con delay")
 repo.publicarConDemora(new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200),console.log);
 //anda, pero tengo sacar el import: import { setTimeout } from "node:timers/promises"; de repositorioPublicaciones
+
+//usando async, imitando comportamiento anterior.
+let publicacionMagica = new PublicacionVenta("Hamburguesa Vegana", "Sin soja", usuario4, 1200) 
+async function main() {
+        const publicacion = await repo.publicarConDemoraAsync(publicacionMagica)
+        repo.agregar(publicacion);
+        console.log("esto es lo que se imprime despues de la demora, con promises")
+}
+main()
