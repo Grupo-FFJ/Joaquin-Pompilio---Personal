@@ -1,12 +1,11 @@
-import { Publicacion } from "./publicacion.js";
+/*import { Publicacion } from "./publicacion.js";
 import { Usuario } from "./usuario.js";
 import { RepositorioPublicaciones } from "./RepositorioPublicaciones.js";
 import { PublicacionVenta } from "./publicacionVenta.js";
 import { PublicacionServicio } from "./publicacionServicio.js";
 import { Regla } from "./regla.js";
 import { validarPublicacion } from "./validaciones.js";
-
-
+*/
 const titulo = document.getElementById("titulo");
 const tipo = document.getElementById("tipo");
 
