@@ -12,6 +12,7 @@ export class Publicacion{
         this.autor = autor //es un objeto tipo usuario
         this.fechaPublicacion = new Date()
         this.activa = true
+        this.destacado = false
 
     }
     mostrarResumen() {
@@ -27,4 +28,7 @@ export class Publicacion{
         const ms = new Date() - this.fechaPublicacion
         return Math.floor(ms / (1000 * 60 * 60 * 24)) // lo paso a dias y redondea para abajo con floor (investigar)
     }
+    darDeBaja() { this.activa = false; }
+    destacar() { this.destacado = !this.destacado}
+
 }

@@ -1,0 +1,12 @@
+0] Imaginen el formulario “Nueva publicación” con título, descripción, autor y tipo de
+publicación. Identifiquen cinco interacciones y completen oralmente: elemento, acción,
+evento y reacción esperada.
+
+¿En qué campo usarían input y en cuál change? Justifiquen la elección según el momento
+en que necesitan reaccionar.
+
+ingreso un titulo 
+ingreso una descripción
+ingreso un autor
+borro un titulo 
+paso de titulo a autor
