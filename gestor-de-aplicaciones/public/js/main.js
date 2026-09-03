@@ -69,12 +69,18 @@ email.addEventListener("focus", mostrarAyudaEmail);
 email.addEventListener("blur", ocultarAyudaEmail);
 
 //Parte 6 y 7
+
 const lista_publicaciones = document.getElementById("lista-publicaciones")
-
+let cont = 0
 function agregarTarjeta(publicacion) {
-
   const tarjeta = document.createElement("article");
   tarjeta.classList.add("tarjeta");
+  tarjeta.dataset.id = cont 
+  tarjeta.addEventListener("click", () => {
+    console.log("-> Click detectado en la TARJETA  id: " , tarjeta.dataset.id);
+  });
+  cont ++
+
 
   const titulo = document.createElement("h3");
   titulo.textContent = publicacion.titulo;
@@ -83,19 +89,27 @@ function agregarTarjeta(publicacion) {
   descripcion.textContent = publicacion.descripcion;
 
   const estado = document.createElement("p");
+  
   estado.textContent = publicacion.activa ? "Activa" : "Inactiva";
+  
+  const botonDestacar = document.createElement("button")git
+  botonDestacar.dataset.accion = "destacar"
+  botonDestacar.textContent = "destacar"
 
-  const boton = document.createElement("button");
-  boton.textContent = "Dar de baja";
+  const botonDarDeBaja = document.createElement("button");
+  botonDarDeBaja.dataset.accion = "baja"
+  botonDarDeBaja.textContent = "Dar de baja";
+ 
   function manejarBaja(evento) {
+  evento.stopPropagation()
     console.log(evento.type, evento.target);
     publicacion.darDeBaja();
     estado.textContent = "Inactiva";
-    boton.disabled = true;
+    botonDarDeBaja.disabled = true;
   }
-  boton.addEventListener("click", manejarBaja);
+  botonDarDeBaja.addEventListener("click", manejarBaja);
 
-  tarjeta.append(titulo, descripcion, estado, boton);
+  tarjeta.append(titulo, descripcion, estado, botonDarDeBaja, botonDestacar);
   lista_publicaciones.appendChild(tarjeta);
 }
 
@@ -119,7 +133,7 @@ function crearPublicacionDesdeFormulario() {
     Number(document.querySelector("#duracion").value),
   );
 }
-
+//parte 4 - tp9
 function manejarEnvio(evento) {
   evento.preventDefault();
   const publicacion = crearPublicacionDesdeFormulario();
@@ -131,18 +145,27 @@ function manejarEnvio(evento) {
 }
 formulario.addEventListener("submit", manejarEnvio);
 
-//parte 8
-/*function manejarBaja(evento) {
-publicacion.activa = false;
-estado.textContent = "Inactiva";
-}
-boton.addEventListener("click", manejarBaja());
-boton.addEventListener("click", manejarBaja);
-boton.addEventListener("click", manejarBaja); */
 
-/* 
-PROBLEMA 1: boton.addEventListener("click", manejarBaja());, ejecuta el la funcion, apenas carga el navegador 
-PROBLEMA 2: Se llama 3 veces a addEventListener 
-PROBLEMA 3: altera directamente el atributo interno del modelo de dominio, violando el principio de encapsulamiento de POO
-(deberia ser: publicacion.darDeBaja(), NOOO: publicacion.activa = false;) 
+//practico 9
+/*
+Hagan clic en una tarjeta, en su texto y en su botón.
+ Registren qué cambia y qué permanece igual.
+Cambia cuando toco un elemento, como un parrafo, un h3, o un boton
+ Quiten el listener con removeEventListener() y verifiquen la consola
 */
+
+/*function observarClick(evento) {
+console.log("target", evento.target);
+console.log("currentTarget", evento.currentTarget);
+}
+lista_publicaciones.addEventListener("click", observarClick); */
+
+function manejarAccion(evento) {
+console.log("estoy adentro")
+const boton = evento.target.closest("button[data-accion]");
+if (!boton || !lista_publicaciones.contains(boton)) return;
+const tarjeta = boton.closest("[data-id]");
+const id = Number(tarjeta.dataset.id);
+console.log(id, boton.dataset.accion);
+}
+lista_publicaciones.addEventListener("click", manejarAccion);
