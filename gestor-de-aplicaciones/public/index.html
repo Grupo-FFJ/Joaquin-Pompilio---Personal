@@ -9,8 +9,11 @@
 <body>
     <form id="form-publicacion">
         <input id="titulo" placeholder="Título" required>
+        <small id="error-titulo" class="error"></small>
         <textarea id="descripcion" placeholder="Descripción"></textarea>
+        <small>Caracteres: <span id="contador">0</span></small>
         <input id="autor" placeholder="Nombre del autor" required>
+        <small id="error-autor" class="error"></small>
         <input id="email" type="email" placeholder="Email" required>
         <small id="ayuda-email"></small> j
         <select id="tipo">
@@ -21,6 +24,10 @@
         <button>Publicar</button>
     </form>
     <output id="vista-previa"></output>
+
+    <button id="btn-actualizar">Actualizar</button>
+    <button id="btn-forzar-error">Forzar error</button>
+    <p id="estado">Listo</p>
     <section id="lista-publicaciones"></section>
 <script type="module" src="./js/main.js"></script>
 </body>
