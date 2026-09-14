@@ -20,7 +20,7 @@ export class RepositorioPublicaciones {
     this.arreglo = datos.map((item) => {
       const usuario = new Usuario(
         item.autor || item.usuario?.nombre || "Autor",
-        item.email || item.usuario?.email || "email@ejemplo.com"
+        item.email || item.usuario?.email || "email@ejemplo.com",
       );
 
       let instancia;
@@ -29,7 +29,7 @@ export class RepositorioPublicaciones {
           item.titulo,
           item.descripcion,
           usuario,
-          Number(item.precio)
+          Number(item.precio),
         );
       } else if (item.tipo === "servicio") {
         instancia = new PublicacionServicio(
@@ -37,7 +37,7 @@ export class RepositorioPublicaciones {
           item.descripcion,
           usuario,
           item.modalidad,
-          Number(item.duracion)
+          Number(item.duracion),
         );
       } else {
         instancia = new Publicacion(item.titulo, item.descripcion, usuario);
@@ -53,7 +53,8 @@ export class RepositorioPublicaciones {
 
   buscarPorUsuario(nombre) {
     return this.arreglo.filter(
-      (publicacion) => publicacion.usuario && publicacion.usuario.nombre === nombre
+      (publicacion) =>
+        publicacion.usuario && publicacion.usuario.nombre === nombre,
     );
   }
 
@@ -71,5 +72,11 @@ export class RepositorioPublicaciones {
 
   filtrarPorTipo(claseConstructor) {
     return this.arreglo.filter((p) => p instanceof claseConstructor);
+  }
+  buscarPorEtiqueta(etiqueta) {
+    return this.arreglo.filter(
+      (publicacion) =>
+        publicacion.activa && publicacion.tieneEtiqueta(etiqueta),
+    );
   }
 }
