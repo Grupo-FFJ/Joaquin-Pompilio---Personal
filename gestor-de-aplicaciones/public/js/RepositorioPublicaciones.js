@@ -79,4 +79,10 @@ export class RepositorioPublicaciones {
         publicacion.activa && publicacion.tieneEtiqueta(etiqueta),
     );
   }
+  //parte 3
+  pendientesDeRevision() {
+    return this.publicaciones.filter(
+      (publicacion) => publicacion.activa && publicacion.requiereRevision(),
+    );
+  }
 }

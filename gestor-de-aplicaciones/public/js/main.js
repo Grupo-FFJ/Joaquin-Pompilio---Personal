@@ -3,6 +3,9 @@ import { Publicacion } from "./publicacion.js";
 import { PublicacionVenta } from "./publicacionVenta.js";
 import { PublicacionServicio } from "./publicacionServicio.js";
 import { RepositorioPublicaciones } from "./RepositorioPublicaciones.js";
+import { Reporte } from "./Reporte.js";
+import { NotificadorWeb } from "./NotificadorWeb.js"
+import { NotificadorEmail } from "./NotificadorEmail.js";
 
 const repositorio = new RepositorioPublicaciones();
 
@@ -391,3 +394,45 @@ if (typeof post1.darDeBaja === "function") {
 //ahora solo devuelve post2
 console.log("Después de dar de baja:", repo.buscarPorEtiqueta("urgente").length); // 1
 console.log(repo.buscarPorEtiqueta("urgente"));
+
+// ------------------------- tp 13 -----------------------------
+//parte 1
+let usuarioPrueba = new Usuario("carlos","asdda@asd.com")
+// 1. Caso correcto
+const reporteValido = new Reporte(usuarioPrueba, "Spam recurrente");
+console.log("Reporte creado con éxito:", reporteValido);
+
+// 2. Caso con error (envuelto en try/catch para capturar el mensaje en consola)
+try {
+  const reporteInvalido = new Reporte(usuarioPrueba, "    ");
+  console.log("No debería llegar acá:", reporteInvalido);
+} catch (error) {
+  console.error("Capturado correctamente:", error.message); 
+  // Salida esperada en rojo: "Capturado correctamente: Motivo inválido"
+}
+
+//parte 2
+const u1 = new Usuario("Lucas", "lucas@ejemplo.com");
+const u2 = new Usuario("Martina", "martina@ejemplo.com");
+const u3 = new Usuario("Pedro", "pedro@ejemplo.com");
+
+const publicacion = new Publicacion(u1, "Venta rara", "Detalles...");
+
+// 1. Estado inicial
+console.log("¿Requiere revisión inicial?:", publicacion.requiereRevision()); // false
+
+// 2. Reporte duplicado del mismo usuario
+publicacion.reportar(u1, "Spam");
+try {
+  publicacion.reportar(u1, "Insisto con el spam");
+} catch (error) {
+  console.error("Capturado duplicado correctamente:", error.message);
+  // Esperado: "El usuario ya reportó esta publicación"
+}
+
+// 3. Tres reportes de usuarios distintos
+publicacion.reportar(u2, "Contenido engañoso");
+console.log("¿Requiere revisión con 2 reportes?:", publicacion.requiereRevision()); // false
+
+publicacion.reportar(u3, "Precio falso");
+console.log("¿Requiere revisión con 3 reportes?:", publicacion.requiereRevision()); // true
