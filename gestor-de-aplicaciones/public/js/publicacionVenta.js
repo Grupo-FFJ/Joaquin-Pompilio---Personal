@@ -10,7 +10,7 @@ export class PublicacionVenta extends Publicacion {
     }
     mostrarResumen() {
         const resumenPadre = super.mostrarResumen()
-        return `${resumenPadre} precio: ${this.precio}`
+        return `${resumenPadre} precio: $${this.precio}`
     }
     
 }

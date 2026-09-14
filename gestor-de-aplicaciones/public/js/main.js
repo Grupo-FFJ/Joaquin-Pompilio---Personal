@@ -355,3 +355,39 @@ actualizarEstadoFormulario();
 }
 }
 formulario.addEventListener("submit", manejarEnvio);
+
+//parte 2
+/*const post = new Publicacion("Ana", "Noticia", "Contenido del post");
+post.agregarEtiqueta("adopción");
+post.agregarEtiqueta("ADOPCIÓN"); // 
+post.agregarEtiqueta("  adopción  "); 
+post.agregarEtiqueta("urgente");
+
+console.log(post.etiquetas); */
+
+
+//parte 3
+const repo = new RepositorioPublicaciones();
+
+const post1 = new Publicacion("Ana", "Perro perdido", "Se busca caniche");
+post1.agregarEtiqueta("urgente");
+
+const post2 = new Publicacion("Luis", "Gato encontrado", "Apareció en la plaza");
+post2.agregarEtiqueta("urgente");
+
+repo.agregar(post1);
+repo.agregar(post2);
+
+// debe devolver ambas publicaciones
+console.log("Antes de dar de baja:", repo.buscarPorEtiqueta("urgente").length); // 2
+
+// desactivar post1 
+if (typeof post1.darDeBaja === "function") {
+  post1.darDeBaja();
+} else {
+  post1.activa = false;
+}
+
+//ahora solo devuelve post2
+console.log("Después de dar de baja:", repo.buscarPorEtiqueta("urgente").length); // 1
+console.log(repo.buscarPorEtiqueta("urgente"));

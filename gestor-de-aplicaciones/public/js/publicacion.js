@@ -13,6 +13,7 @@ export class Publicacion {
     this.fechaPublicacion = new Date();
     this.activa = true;
     this.destacado = false;
+    this.etiquetas = [];
   }
   mostrarResumen() {
     return this.titulo + " " + this.descripcion + " " + this.autor.nombre;
@@ -38,5 +39,19 @@ export class Publicacion {
     const estadoTexto = this.activa ? "Activa" : "Inactiva";
     const nombreAutor = this.usuario ? this.usuario.nombre : "Sin autor";
     return `${nombreAutor} — ${this.titulo} (${estadoTexto})`;
+  }
+  agregarEtiqueta(etiqueta) {
+    const normalizada = etiqueta.trim();
+    if (!normalizada) {
+      throw new Error("Etiqueta inválida");
+    }
+    const yaExiste = this.tieneEtiqueta(normalizada);
+    if (!yaExiste) {
+      this.etiquetas.push(normalizada);
+    }
+  }
+  tieneEtiqueta(etiqueta) {
+    const buscada = etiqueta.trim().toLowerCase();
+    return this.etiquetas.some((e) => e.toLowerCase() === buscada);
   }
 }
