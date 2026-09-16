@@ -1,0 +1,60 @@
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             CLIENTE (Navegador)                                  │
+│                                                                                  │
+│  [ public/index.html ]                                                           │
+│  ┌──────────────────────────────────────────────┐                                │
+│  │ <button id="consultar">Consultar</button>    │──(1. Clic del usuario)         │
+│  │ <p id="estado-comunidad"></p>                │                      │         │
+│  └──────────────────────────────────────────────┘                      ▼         │
+│                                                                                  │
+│  [ public/js/app.js ]                                                            │
+│  ┌────────────────────────────────────────────────────────────────────────────┐  │
+│  │ botonConsultar.addEventListener("click", async () => {                     │  │
+│  │   parrafo.textContent = "Consultando...";                                  │  │
+│  │   const respuesta = await fetch("/estado-comunidad"); ──────────────┐      │  │
+│  │   const texto = await respuesta.text();                             │(2)   │  │
+│  │   parrafo.textContent = texto; ◄──────────────────────────────┐     │HTTP  │  │
+│  │ });                                                           │(6)  │GET   │  │
+│  └───────────────────────────────────────────────────────────────┼─────┼──────┘  │
+└──────────────────────────────────────────────────────────────────┼─────┼─────────┘
+                                   RED                             │     │
+───────────────────────────────────────────────────────────────────┼─────┼──────────
+                                                                   │     │
+┌──────────────────────────────────────────────────────────────────┼─────┼─────────┐
+│                             SERVIDOR (Node.js)                   │     │         │
+│                                                                  │     ▼         │
+│  [ server.js ]                                                   │               │
+│  ┌───────────────────────────────────────────────────────────────┴────────────┐  │
+│  │ const app = express();                                                     │  │
+│  │                                                                            │  │
+│  │ // Middleware estático:                                                    │  │
+│  │ app.use(express.static(path.join(__dirname, "public")));                   │  │
+│  │                                                                            │  │
+│  │ // Handler de la ruta:                                                     │  │
+│  │ app.get("/estado-comunidad", (req, res) => {                         (3)   │  │
+│  │   const mensaje = repositorio.obtenerEstado(); ──────────────┐   Ruteo     │  │
+│  │   res.send(mensaje); ────────────────────────────────────────┼─────────────┘  │
+│  │ });                                                          │(5)             │
+│  │                                                              │HTTP 200        │
+│  │ app.listen(3000);                                            │                │
+│  └──────────────────────────────────────────────────────────────┼────────────────┘
+│                                                                 │                 
+│  [ src/RepositorioPublicaciones.js ]                            ▼ (4) Lógica     
+│  ┌────────────────────────────────────────────────────────────────────────────┐  │
+│  │ class RepositorioPublicaciones {                                           │  │
+│  │   obtenerEstado() {                                                        │  │
+│  │     const activas = this.arreglo.filter(p => p.activa).length;             │  │
+│  │     return `Publicaciones activas: ${activas}`;                            │  │
+│  │   }                                                                        │  │
+│  │ }                                                                          │  │
+│  └────────────────────────────────────────────────────────────────────────────┘  │
+│                               DOMINIO                                            │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+🛠️ Flujo de Ejecución Paso a Paso
+1. Evento de interfaz (Cliente)El usuario presiona el botón en la página servida desde public/index.html.El navegador ejecuta el callback (función de respuesta) registrado con addEventListener("click", ...) en el archivo public/js/app.js.
+2. Despacho asíncrono (Cliente)La función fetch("/estado-comunidad") genera una petición HTTP GET.El navegador transmite esta petición a través de la red hacia el servidor Express.
+3. Enrutamiento y control (Servidor)El servidor Express escucha en el puerto activo y evalúa la tabla de rutas.Encuentra la coincidencia con app.get("/estado-comunidad", (req, res) => { ... }).Invoca el handler (manejador) pasando las instancias req (datos de entrada) y res (métodos de salida).
+4. Cálculo de estado (Dominio)El handler delega la lógica e invoca a repositorio.obtenerEstado().La clase RepositorioPublicaciones recorre su arreglo interno (this.arreglo).Filtra las publicaciones activas evaluando el predicado p.activa con .filter().Obtiene la longitud del array resultante (.length) y retorna un string con el resumen.
+5. Emisión del paquete HTTP (Servidor)El handler recibe el string de texto y ejecuta res.send(mensaje).Express construye la cabecera HTTP automáticamente (Estado 200 OK, Content-Type: text/html o text/plain).Anexa el texto en el cuerpo de la respuesta y lo transmite de vuelta por la red.
+6. Consumo y actualización (Cliente)La promesa del fetch se resuelve en el navegador.El cliente valida que la respuesta sea correcta con respuesta.ok.Extrae el contenido plano usando await respuesta.text().Actualiza el árbol DOM asignando el valor directamente a parrafo.textContent.Manejo de errores: Si hay una falla de red o el servidor se cae, el flujo entra al bloque catch e inyecta un mensaje de error en la interfaz sin que la página colapse.

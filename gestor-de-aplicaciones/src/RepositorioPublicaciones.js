@@ -81,8 +81,17 @@ export class RepositorioPublicaciones {
   }
   //parte 3
   pendientesDeRevision() {
-    return this.publicaciones.filter(
+    return this.arreglo.filter(
       (publicacion) => publicacion.activa && publicacion.requiereRevision(),
     );
   }
+
+  obtenerEstado() {
+    const activas = this.arreglo.filter((p) => p.activa).length;
+    return `Publicaciones activas: ${activas}`;
+  }
+  obtenerEstadoInactivas() {
+  const inactivas = this.arreglo.filter(p => !p.activa).length;
+  return `Publicaciones inactivas: ${inactivas}`;
+}
 }
