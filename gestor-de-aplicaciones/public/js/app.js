@@ -1,5 +1,3 @@
-
-
 // --- 1. Elementos del DOM ---
 const vistaPrevia = document.getElementById("vista-previa");
 const titulo = document.getElementById("titulo");
@@ -18,7 +16,7 @@ const enviar = formulario ? formulario.querySelector("button") : null;
 const botonConsultar = document.querySelector("#consultar");
 const parrafoEstado = document.querySelector("#estado-comunidad");
 const botonInactivas = document.querySelector("#consultar-inactivas");
-const parrafoEstadoComunidad = document.querySelector("#estado-inactivas")
+const parrafoEstadoComunidad = document.querySelector("#estado-inactivas");
 
 // --- 2. Vista previa y validaciones del Cliente ---
 function actualizarVistaPrevia() {
@@ -58,7 +56,8 @@ function validarTitulo(mostrarError = true) {
   titulo.classList.toggle("valido", valido);
   titulo.classList.toggle("invalido", !valido && mostrarError);
   if (errorTitulo) {
-    errorTitulo.textContent = !valido && mostrarError ? "Ingrese al menos 5 caracteres" : "";
+    errorTitulo.textContent =
+      !valido && mostrarError ? "Ingrese al menos 5 caracteres" : "";
   }
   return valido;
 }
@@ -69,7 +68,8 @@ function validarAutor(mostrarError = true) {
   autor.classList.toggle("valido", valido);
   autor.classList.toggle("invalido", !valido && mostrarError);
   if (errorAutor) {
-    errorAutor.textContent = !valido && mostrarError ? "Ingrese al menos 3 caracteres" : "";
+    errorAutor.textContent =
+      !valido && mostrarError ? "Ingrese al menos 3 caracteres" : "";
   }
   return valido;
 }
@@ -84,14 +84,16 @@ function validarPrecio(mostrarError = true) {
   inputPrecio.classList.toggle("valido", valido);
   inputPrecio.classList.toggle("invalido", !valido && mostrarError);
   if (errorPrecio) {
-    errorPrecio.textContent = !valido && mostrarError ? "El precio debe ser mayor a 0" : "";
+    errorPrecio.textContent =
+      !valido && mostrarError ? "El precio debe ser mayor a 0" : "";
   }
   return valido;
 }
 
 function formularioValido() {
   const inputPrecio = document.getElementById("precio");
-  const precioValido = tipo?.value !== "venta" || (inputPrecio && Number(inputPrecio.value) > 0);
+  const precioValido =
+    tipo?.value !== "venta" || (inputPrecio && Number(inputPrecio.value) > 0);
   return (
     titulo?.value.trim().length >= 5 &&
     autor?.value.trim().length >= 3 &&
@@ -107,15 +109,23 @@ function actualizarEstadoFormulario() {
 
 // Listeners de UI
 if (titulo && autor && tipo) {
-  [titulo, autor, tipo].forEach(control => control.addEventListener("input", actualizarVistaPrevia));
+  [titulo, autor, tipo].forEach((control) =>
+    control.addEventListener("input", actualizarVistaPrevia),
+  );
   tipo.addEventListener("change", () => {
     actualizarCamposEspecificos();
     actualizarVistaPrevia();
     actualizarEstadoFormulario();
   });
-  titulo.addEventListener("input", () => { validarTitulo(false); actualizarEstadoFormulario(); });
+  titulo.addEventListener("input", () => {
+    validarTitulo(false);
+    actualizarEstadoFormulario();
+  });
   titulo.addEventListener("blur", () => validarTitulo(true));
-  autor.addEventListener("input", () => { validarAutor(false); actualizarEstadoFormulario(); });
+  autor.addEventListener("input", () => {
+    validarAutor(false);
+    actualizarEstadoFormulario();
+  });
   autor.addEventListener("blur", () => validarAutor(true));
   actualizarCamposEspecificos();
   actualizarEstadoFormulario();
@@ -138,7 +148,6 @@ if (botonConsultar && parrafoEstado) {
   });
 }
 
-
 if (botonInactivas) {
   botonInactivas.addEventListener("click", async () => {
     parrafoEstadoComunidad.textContent = "Consultando...";
@@ -154,3 +163,27 @@ if (botonInactivas) {
     }
   });
 }
+
+formulario.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const respuesta = await fetch(formulario.action, {
+    method: formulario.method,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(new FormData(formulario)),
+  });
+  salida.textContent = await respuesta.text();
+  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
+  if (respuesta.ok) formulario.reset();
+});
+//Parte 4 · Envío controlado desde el cliente - tp 16
+formulario.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const respuesta = await fetch(formulario.action, {
+    method: formulario.method,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(new FormData(formulario)),
+  });
+  salida.textContent = await respuesta.text();
+  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
+  if (respuesta.ok) formulario.reset();
+});

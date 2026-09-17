@@ -10,6 +10,7 @@ const app = express();
 const repositorio = new RepositorioPublicaciones();
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: false }));
 
 app.get("/estado-comunidad", (req, res) => {
   res.send(repositorio.obtenerEstado());
@@ -17,6 +18,21 @@ app.get("/estado-comunidad", (req, res) => {
 
 app.get("/estado-inactivas", (req, res) => {
   res.send(repositorio.obtenerEstadoInactivas());
+});
+
+app.post("/publicaciones", (req, res) => {
+  try {
+    const publicacion = new Publicacion(
+      req.body.autor,
+      req.body.titulo,
+      req.body.descripcion,
+      req.body.categoria,
+    );
+    repositorio.agregar(publicacion);
+    res.status(201).send(publicacion.mostrarResumen());
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
 });
 
 /*GET identifica el método, /estado-comunidad el camino, y la función el handler. req
@@ -37,7 +53,7 @@ const pub1 = new Publicacion("Perro perdido", "Se busca caniche", u);
 const pub2 = new Publicacion("Gato encontrado", "En la plaza", u);
 const pub3 = new Publicacion("Bici vieja", "Para reparar", u);
 
-pub3.activa = false; // o pub3.darDeBaja();
+pub3.activa = false;
 
 repositorio.agregar(pub1);
 repositorio.agregar(pub2);

@@ -1,4 +1,10 @@
 import { Reporte } from "./Reporte.js";
+export const CATEGORIAS_PERMITIDAS = [
+  "general",
+  "aviso",
+  "evento",
+  "compraventa",
+];
 
 export class Publicacion {
   //es para los types
@@ -8,10 +14,26 @@ export class Publicacion {
   fechaPublicacion;
   activa;
   //
-  constructor(titulo, descripcion, autor) {
-    this.titulo = titulo;
-    this.descripcion = descripcion;
-    this.autor = autor; //es un objeto tipo usuario
+  constructor(autor, titulo, descripcion, categoria = "general") {
+    if (!autor?.trim()) {
+      throw new Error("El autor es obligatorio");
+    }
+    const tituloNormalizado = titulo?.trim() ?? "";
+    if (tituloNormalizado.length < 5 || tituloNormalizado.length > 80) {
+      throw new Error("El título debe tener entre 5 y 80 caracteres");
+    }
+    const descripcionNormalizado = descripcion?.trim() ?? "";
+    if (
+      descripcionNormalizado.length < 20 ||
+      descripcionNormalizado.length > 500
+    ) {
+      throw new Error("La descripcion debe tener entre 20 y 500 caracteres");
+    }
+    if (!CATEGORIAS_PERMITIDAS.includes(categoria)) {
+      throw new Error(
+        `La categoría debe ser una de: ${CATEGORIAS_PERMITIDAS.join(",")}`,
+      );
+    }
     this.fechaPublicacion = new Date();
     this.activa = true;
     this.destacado = false;
@@ -80,4 +102,5 @@ export class Publicacion {
     }
     return this.estado;
   }
+  
 }
