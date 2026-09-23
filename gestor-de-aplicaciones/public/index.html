@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Publicaciones</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -16,30 +16,36 @@
         <p id="estado-inactivas"></p>
     </section>
 
+    <!-- Formulario adaptado a las reglas del dominio y req.body  EJERCICIO 16 - PARTE 2 --> 
     <form id="form-publicacion" action="/publicaciones" method="post">
-        <input id="titulo" name="titulo" placeholder="Título" required>
-        <small id="error-titulo" class="error"></small>
-        <textarea id="descripcion" name="descripcion" placeholder="Descripción"></textarea>
-        <small>Caracteres: <span id="contador">0</span></small>
-        <input id="autor" class="autor" placeholder="Nombre del autor" required>
+        <label>Autor
+            <input id="autor" name="autor" required>
+        </label>
         <small id="error-autor" class="error"></small>
-        <input id="email" type="email" placeholder="Email" required>
-        <small id="ayuda-email"></small> j
-        <select id="tipo">
-            <option value="venta">Venta</option>
-            <option value="servicio">Servicio</option>
-        </select>
+
+        <label>Título
+            <input id="titulo" name="titulo" minlength="5" maxlength="80" required>
+        </label>
+        <small id="error-titulo" class="error"></small>
+
+        <label>Descripción
+            <textarea id="descripcion" name="descripcion" minlength="20" maxlength="500" required></textarea>
+        </label>
+        <small>Caracteres: <span id="contador">0</span></small>
+
         <label>Categoría
-            <select name="categoria" required>
+            <select id="categoria" name="categoria" required>
                 <option value="general">General</option>
                 <option value="aviso">Aviso</option>
                 <option value="evento">Evento</option>
                 <option value="compraventa">Compra-venta</option>
             </select>
         </label>
+
         <div id="campos-especificos"></div>
-        <button>Publicar</button>
+        <button type="submit">Publicar</button>
     </form>
+    
     <p id="salida"></p>
 
     <output id="vista-previa"></output>
@@ -47,6 +53,7 @@
     <button id="btn-forzar-error">Forzar error</button>
     <p id="estado">Listo</p>
     <section id="lista-publicaciones"></section>
+
     <script type="module" src="./js/app.js"></script>
 </body>
 

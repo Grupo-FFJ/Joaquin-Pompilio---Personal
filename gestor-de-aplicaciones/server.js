@@ -2,16 +2,48 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { RepositorioPublicaciones } from "./src/RepositorioPublicaciones.js";
+import { Usuario } from "./src/usuario.js";
+import { Publicacion } from "./src/publicacion.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// instancia del dominio
+// Instancia del repositorio
 const repositorio = new RepositorioPublicaciones();
 
+// Datos iniciales de prueba (respetando autor, título >= 5 y descripción >= 20 caracteres)
+const pub1 = new Publicacion(
+  "Lucas",
+  "Perro perdido",
+  "Se busca caniche blanco con collar rojo por la zona céntrica",
+  "aviso"
+);
+
+const pub2 = new Publicacion(
+  "Lucas",
+  "Gato encontrado",
+  "Gato persa encontrado merodeando cerca de la plaza principal",
+  "aviso"
+);
+
+const pub3 = new Publicacion(
+  "Lucas",
+  "Bici vieja rodado 26",
+  "Bicicleta usada para reparar, necesita cambio de cubiertas",
+  "compraventa"
+);
+
+pub3.activa = false;
+
+repositorio.agregar(pub1);
+repositorio.agregar(pub2);
+repositorio.agregar(pub3);
+
+// Middlewares - EJERCICIO !& - Parte 3
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: false }));
 
+// Rutas
 app.get("/estado-comunidad", (req, res) => {
   res.send(repositorio.obtenerEstado());
 });
@@ -26,7 +58,7 @@ app.post("/publicaciones", (req, res) => {
       req.body.autor,
       req.body.titulo,
       req.body.descripcion,
-      req.body.categoria,
+      req.body.categoria
     );
     repositorio.agregar(publicacion);
     res.status(201).send(publicacion.mostrarResumen());
@@ -35,26 +67,7 @@ app.post("/publicaciones", (req, res) => {
   }
 });
 
-/*GET identifica el método, /estado-comunidad el camino, y la función el handler. req
-representa lo que llegó al servidor; res son las operaciones para construir y enviar la
-respuesta. El handler coordina — quien decide el contenido del mensaje es
-repositorio.obtenerEstado(). */
-
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
-import { Usuario } from "./src/usuario.js";
-import { Publicacion } from "./src/publicacion.js";
-
-const u = new Usuario("Lucas", "lucas@ejemplo.com");
-const pub1 = new Publicacion("Perro perdido", "Se busca caniche", u);
-const pub2 = new Publicacion("Gato encontrado", "En la plaza", u);
-const pub3 = new Publicacion("Bici vieja", "Para reparar", u);
-
-pub3.activa = false;
-
-repositorio.agregar(pub1);
-repositorio.agregar(pub2);
-repositorio.agregar(pub3);

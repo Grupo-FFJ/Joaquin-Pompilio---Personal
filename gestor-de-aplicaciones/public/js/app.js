@@ -130,6 +130,18 @@ if (titulo && autor && tipo) {
   actualizarCamposEspecificos();
   actualizarEstadoFormulario();
 }
+//PRACTICA 16 - parte 4
+formulario.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const respuesta = await fetch(formulario.action, {
+    method: formulario.method,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(new FormData(formulario)),
+  });
+  salida.textContent = await respuesta.text();
+  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
+  if (respuesta.ok) formulario.reset();
+});
 
 // --- 3. Consulta al Servidor (Parte 3 del TP 15) ---
 if (botonConsultar && parrafoEstado) {

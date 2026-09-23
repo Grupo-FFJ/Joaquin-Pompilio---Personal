@@ -15,13 +15,16 @@ export class Publicacion {
   activa;
   //
   constructor(autor, titulo, descripcion, categoria = "general") {
+    // 1. Convertir y validar
     if (!autor?.trim()) {
       throw new Error("El autor es obligatorio");
     }
+
     const tituloNormalizado = titulo?.trim() ?? "";
     if (tituloNormalizado.length < 5 || tituloNormalizado.length > 80) {
       throw new Error("El título debe tener entre 5 y 80 caracteres");
     }
+
     const descripcionNormalizado = descripcion?.trim() ?? "";
     if (
       descripcionNormalizado.length < 20 ||
@@ -29,11 +32,20 @@ export class Publicacion {
     ) {
       throw new Error("La descripcion debe tener entre 20 y 500 caracteres");
     }
+
     if (!CATEGORIAS_PERMITIDAS.includes(categoria)) {
-      throw new Error(
+      throw new Err
+      
+      or(
         `La categoría debe ser una de: ${CATEGORIAS_PERMITIDAS.join(",")}`,
       );
     }
+
+    // 2. Asignar (siguiendo convertir -> validar -> asignar)
+    this.autor = autor.trim();
+    this.titulo = tituloNormalizado;
+    this.descripcion = descripcionNormalizado;
+    this.categoria = categoria;
     this.fechaPublicacion = new Date();
     this.activa = true;
     this.destacado = false;
@@ -41,6 +53,7 @@ export class Publicacion {
     this.reportes = [];
     this.estado = "pendiente";
   }
+
   mostrarResumen() {
     return this.titulo + " " + this.descripcion + " " + this.autor.nombre;
   }
@@ -102,5 +115,4 @@ export class Publicacion {
     }
     return this.estado;
   }
-  
 }
