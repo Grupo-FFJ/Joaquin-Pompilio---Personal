@@ -10,7 +10,9 @@ const ayudaEmail = document.getElementById("ayuda-email");
 const formulario = document.getElementById("form-publicacion");
 const errorTitulo = document.getElementById("error-titulo");
 const errorAutor = document.getElementById("error-autor");
+const salida = document.getElementById("salida");
 const enviar = formulario ? formulario.querySelector("button") : null;
+const listaPublicaciones = document.getElementById("lista-publicaciones");
 
 // Elementos nuevos de la Clase 15
 const botonConsultar = document.querySelector("#consultar");
@@ -110,7 +112,7 @@ function actualizarEstadoFormulario() {
 // Listeners de UI
 if (titulo && autor && tipo) {
   [titulo, autor, tipo].forEach((control) =>
-    control.addEventListener("input", actualizarVistaPrevia),
+    control.addEventListener("input", actualizarVistaPrevia)
   );
   tipo.addEventListener("change", () => {
     actualizarCamposEspecificos();
@@ -130,28 +132,14 @@ if (titulo && autor && tipo) {
   actualizarCamposEspecificos();
   actualizarEstadoFormulario();
 }
-//PRACTICA 16 - parte 4
-formulario.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const respuesta = await fetch(formulario.action, {
-    method: formulario.method,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(new FormData(formulario)),
-  });
-  salida.textContent = await respuesta.text();
-  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
-  if (respuesta.ok) formulario.reset();
-});
 
-// --- 3. Consulta al Servidor (Parte 3 del TP 15) ---
+// --- 3. Consultas al Servidor (TP 15) ---
 if (botonConsultar && parrafoEstado) {
   botonConsultar.addEventListener("click", async () => {
     parrafoEstado.textContent = "Consultando...";
     try {
       const respuesta = await fetch("/estado-comunidad");
-      if (!respuesta.ok) {
-        throw new Error("La respuesta no fue exitosa");
-      }
+      if (!respuesta.ok) throw new Error("La respuesta no fue exitosa");
       const texto = await respuesta.text();
       parrafoEstado.textContent = texto;
     } catch (error) {
@@ -164,10 +152,8 @@ if (botonInactivas) {
   botonInactivas.addEventListener("click", async () => {
     parrafoEstadoComunidad.textContent = "Consultando...";
     try {
-      const respuesta = await fetch("/estado-inactivas"); //disparo otra ruta
-      if (!respuesta.ok) {
-        throw new Error("La respuesta no fue exitosa");
-      }
+      const respuesta = await fetch("/estado-inactivas");
+      if (!respuesta.ok) throw new Error("La respuesta no fue exitosa");
       const texto = await respuesta.text();
       parrafoEstadoComunidad.textContent = texto;
     } catch (error) {
@@ -176,26 +162,81 @@ if (botonInactivas) {
   });
 }
 
-formulario.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const respuesta = await fetch(formulario.action, {
-    method: formulario.method,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(new FormData(formulario)),
-  });
-  salida.textContent = await respuesta.text();
-  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
-  if (respuesta.ok) formulario.reset();
+// --- 4. Renderizado dinámico de publicaciones (TP 17 - Pasos 5D y 5E) ---
+async function cargarPublicaciones() {
+  try {
+    const respuesta = await fetch("/publicaciones");
+    if (!respuesta.ok) throw new Error("Error al obtener publicaciones");
+
+    const publicaciones = await respuesta.json();
+
+    listaPublicaciones.innerHTML = "";
+    const ul = document.createElement("ul");
+
+    publicaciones.forEach((pub) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${pub.titulo} - ${pub.autor} (${pub.categoria}): ${pub.descripcion}</span>
+        <button class="btn-eliminar" data-id="${pub.id}">Eliminar</button>
+      `;
+      ul.appendChild(li);
+    });
+
+    listaPublicaciones.appendChild(ul);
+  } catch (error) {
+    console.error("Error al cargar publicaciones:", error);
+  }
+}
+
+// Delegación de eventos para capturar el clic en cualquier botón "Eliminar"
+listaPublicaciones.addEventListener("click", async (evento) => {
+  if (evento.target.matches(".btn-eliminar")) {
+    const id = evento.target.dataset.id;
+    try {
+      const respuesta = await fetch(`/publicaciones/${id}`, {
+        method: "DELETE",
+      });
+
+      if (respuesta.ok) {
+        await cargarPublicaciones(); // Refresca la lista
+      } else {
+        alert("No se pudo eliminar la publicación");
+      }
+    } catch (error) {
+      console.error("Error en la eliminación:", error);
+    }
+  }
 });
-//Parte 4 · Envío controlado desde el cliente - tp 16
-formulario.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const respuesta = await fetch(formulario.action, {
-    method: formulario.method,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(new FormData(formulario)),
+
+// Carga inicial
+cargarPublicaciones();
+
+// Único listener de envío de formulario
+if (formulario) {
+  formulario.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    try {
+      const respuesta = await fetch(formulario.action, {
+        method: formulario.method,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(formulario)),
+      });
+
+      if (salida) {
+        salida.textContent = await respuesta.text();
+        salida.dataset.tipo = respuesta.ok ? "exito" : "error";
+      }
+
+      if (respuesta.ok) {
+        formulario.reset();
+        await cargarPublicaciones(); // Refresca la lista una sola vez
+      }
+    } catch (error) {
+      if (salida) {
+        salida.textContent = "Error de conexión con el servidor";
+        salida.dataset.tipo = "error";
+      }
+    }
   });
-  salida.textContent = await respuesta.text();
-  salida.dataset.tipo = respuesta.ok ? "exito" : "error";
-  if (respuesta.ok) formulario.reset();
-});
+}

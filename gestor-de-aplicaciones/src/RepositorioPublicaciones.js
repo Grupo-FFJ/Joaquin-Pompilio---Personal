@@ -5,22 +5,73 @@ import { PublicacionServicio } from "./publicacionServicio.js";
 
 export class RepositorioPublicaciones {
   constructor() {
-    this.arreglo = [];
+    this.publicaciones = []; // Unificado en this.publicaciones
+    this.proximoId = 1;
   }
 
-  agregar(publicacion) {
-    this.arreglo.push(publicacion);
+  agregar(autor, titulo, descripcion, categoria) {
+    // PASO 2A: construir la Publicacion con this.proximoId y avanzar el contador
+    const publicacion = new Publicacion(autor, titulo, descripcion, categoria);
+    publicacion.id = this.proximoId;
+    this.proximoId++;
+
+    this.publicaciones.push(publicacion);
+    return publicacion;
+  }
+
+  listar() {
+    // PASO 2B: devolver una copia superficial
+    return [...this.publicaciones];
+  }
+
+  buscarPorId(id) {
+    // PASO 2C: usar Number(id) para IDs que llegan como string
+    const idNumerico = Number(id);
+    return this.publicaciones.find((pub) => pub.id === idNumerico);
+  }
+
+  actualizar(id, cambios) {
+    const anterior = this.buscarPorId(id);
+    if (!anterior) throw new Error("Publicación inexistente");
+
+    // Constructor respeta: (autor, titulo, descripcion, categoria)
+    const actualizada = new Publicacion(
+      cambios.autor ?? anterior.autor,
+      cambios.titulo ?? anterior.titulo,
+      cambios.descripcion ?? anterior.descripcion,
+      cambios.categoria ?? anterior.categoria
+    );
+
+    // PASO 3: Conservamos el id y el estado previo
+    actualizada.id = anterior.id;
+    actualizada.activa = anterior.activa;
+    actualizada.destacado = anterior.destacado;
+    actualizada.fechaPublicacion = anterior.fechaPublicacion;
+    actualizada.etiquetas = [...anterior.etiquetas];
+    actualizada.reportes = [...anterior.reportes];
+    actualizada.estado = anterior.estado;
+
+    const indice = this.publicaciones.indexOf(anterior);
+    this.publicaciones[indice] = actualizada;
+    return actualizada;
+  }
+
+  eliminar(id) {
+    const publicacion = this.buscarPorId(id);
+    if (!publicacion) return false;
+    this.publicaciones.splice(this.publicaciones.indexOf(publicacion), 1);
+    return true;
   }
 
   todas() {
-    return this.arreglo;
+    return [...this.publicaciones];
   }
 
   cargarDesde(datos) {
-    this.arreglo = datos.map((item) => {
+    this.publicaciones = datos.map((item) => {
       const usuario = new Usuario(
         item.autor || item.usuario?.nombre || "Autor",
-        item.email || item.usuario?.email || "email@ejemplo.com",
+        item.email || item.usuario?.email || "email@ejemplo.com"
       );
 
       let instancia;
@@ -29,7 +80,7 @@ export class RepositorioPublicaciones {
           item.titulo,
           item.descripcion,
           usuario,
-          Number(item.precio),
+          Number(item.precio)
         );
       } else if (item.tipo === "servicio") {
         instancia = new PublicacionServicio(
@@ -37,11 +88,18 @@ export class RepositorioPublicaciones {
           item.descripcion,
           usuario,
           item.modalidad,
-          Number(item.duracion),
+          Number(item.duracion)
         );
       } else {
-        instancia = new Publicacion(item.titulo, item.descripcion, usuario);
+        instancia = new Publicacion(
+          usuario.nombre,
+          item.titulo,
+          item.descripcion,
+          item.categoria || "general"
+        );
       }
+
+      instancia.id = this.proximoId++;
 
       if (item.activa === false) {
         instancia.darDeBaja();
@@ -52,46 +110,49 @@ export class RepositorioPublicaciones {
   }
 
   buscarPorUsuario(nombre) {
-    return this.arreglo.filter(
+    return this.publicaciones.filter(
       (publicacion) =>
-        publicacion.usuario && publicacion.usuario.nombre === nombre,
+        publicacion.autor === nombre ||
+        (publicacion.usuario && publicacion.usuario.nombre === nombre)
     );
   }
 
   filtrarActivas() {
-    return this.arreglo.filter((publicacion) => publicacion.activa === true);
+    return this.publicaciones.filter((publicacion) => publicacion.activa === true);
   }
 
   cantidadTotal() {
-    return this.arreglo.length;
+    return this.publicaciones.length;
   }
 
   listaResumenes() {
-    return this.arreglo.map((publicacion) => publicacion.resumen);
+    return this.publicaciones.map((publicacion) => publicacion.resumen);
   }
 
   filtrarPorTipo(claseConstructor) {
-    return this.arreglo.filter((p) => p instanceof claseConstructor);
+    return this.publicaciones.filter((p) => p instanceof claseConstructor);
   }
+
   buscarPorEtiqueta(etiqueta) {
-    return this.arreglo.filter(
+    return this.publicaciones.filter(
       (publicacion) =>
-        publicacion.activa && publicacion.tieneEtiqueta(etiqueta),
+        publicacion.activa && publicacion.tieneEtiqueta(etiqueta)
     );
   }
-  //parte 3
+
   pendientesDeRevision() {
-    return this.arreglo.filter(
-      (publicacion) => publicacion.activa && publicacion.requiereRevision(),
+    return this.publicaciones.filter(
+      (publicacion) => publicacion.activa && publicacion.requiereRevision()
     );
   }
 
   obtenerEstado() {
-    const activas = this.arreglo.filter((p) => p.activa).length;
+    const activas = this.publicaciones.filter((p) => p.activa).length;
     return `Publicaciones activas: ${activas}`;
   }
+
   obtenerEstadoInactivas() {
-  const inactivas = this.arreglo.filter(p => !p.activa).length;
-  return `Publicaciones inactivas: ${inactivas}`;
-}
+    const inactivas = this.publicaciones.filter((p) => !p.activa).length;
+    return `Publicaciones inactivas: ${inactivas}`;
+  }
 }
