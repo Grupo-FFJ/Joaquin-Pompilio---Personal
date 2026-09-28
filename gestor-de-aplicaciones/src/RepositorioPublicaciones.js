@@ -1,40 +1,79 @@
+import { readFile, writeFile } from "node:fs/promises";
 import { Usuario } from "./usuario.js";
 import { Publicacion } from "./publicacion.js";
 import { PublicacionVenta } from "./publicacionVenta.js";
 import { PublicacionServicio } from "./publicacionServicio.js";
 
 export class RepositorioPublicaciones {
-  constructor() {
-    this.publicaciones = []; // Unificado en this.publicaciones
+  constructor(ruta) {
+    this.ruta = ruta;
+    this.publicaciones = [];
     this.proximoId = 1;
   }
 
-  agregar(autor, titulo, descripcion, categoria) {
-    // PASO 2A: construir la Publicacion con this.proximoId y avanzar el contador
+  async cargar() {
+    try {
+      // PASO 7A: leer con readFile(this.ruta, "utf8"), JSON.parse,
+      // reconstruir cada Publicacion y recalcular this.proximoId
+      const contenido = await readFile(this.ruta, "utf8");
+      const datosCrudos = JSON.parse(contenido);
+
+      this.publicaciones = datosCrudos.map((d) => {
+        const pub = new Publicacion(d.autor, d.titulo, d.descripcion, d.categoria);
+        pub.id = d.id;
+        if (d.activa !== undefined) pub.activa = d.activa;
+        return pub;
+      });
+
+      // Recalculo proximoId tomando el id mas alto existente + 1
+      if (this.publicaciones.length > 0) {
+        const maxId = Math.max(...this.publicaciones.map((p) => p.id));
+        this.proximoId = maxId + 1;
+      } else {
+        this.proximoId = 1;
+      }
+    } catch (error) {
+      // PASO 7B: si error.code === "ENOENT" el archivo no existe todavía:
+      if (error.code === "ENOENT") {
+        this.publicaciones = [];
+        this.proximoId = 1;
+        await this.guardar();
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  // PASO 8A: writeFile con formato legible (indentado a 2 espacios)
+  async guardar() {
+    await writeFile(this.ruta, JSON.stringify(this.publicaciones, null, 2), "utf8");
+  }
+
+  // PASO 8B: async + await this.guardar()
+  async agregar(autor, titulo, descripcion, categoria) {
     const publicacion = new Publicacion(autor, titulo, descripcion, categoria);
     publicacion.id = this.proximoId;
     this.proximoId++;
 
     this.publicaciones.push(publicacion);
+    await this.guardar();
     return publicacion;
   }
 
   listar() {
-    // PASO 2B: devolver una copia superficial
     return [...this.publicaciones];
   }
 
   buscarPorId(id) {
-    // PASO 2C: usar Number(id) para IDs que llegan como string
     const idNumerico = Number(id);
     return this.publicaciones.find((pub) => pub.id === idNumerico);
   }
 
-  actualizar(id, cambios) {
+  // PASO 8C: actualizar y eliminar también persisten en disco
+  async actualizar(id, cambios) {
     const anterior = this.buscarPorId(id);
     if (!anterior) throw new Error("Publicación inexistente");
 
-    // Constructor respeta: (autor, titulo, descripcion, categoria)
     const actualizada = new Publicacion(
       cambios.autor ?? anterior.autor,
       cambios.titulo ?? anterior.titulo,
@@ -42,7 +81,6 @@ export class RepositorioPublicaciones {
       cambios.categoria ?? anterior.categoria
     );
 
-    // PASO 3: Conservamos el id y el estado previo
     actualizada.id = anterior.id;
     actualizada.activa = anterior.activa;
     actualizada.destacado = anterior.destacado;
@@ -53,13 +91,17 @@ export class RepositorioPublicaciones {
 
     const indice = this.publicaciones.indexOf(anterior);
     this.publicaciones[indice] = actualizada;
+
+    await this.guardar();
     return actualizada;
   }
 
-  eliminar(id) {
+  async eliminar(id) {
     const publicacion = this.buscarPorId(id);
     if (!publicacion) return false;
+
     this.publicaciones.splice(this.publicaciones.indexOf(publicacion), 1);
+    await this.guardar();
     return true;
   }
 

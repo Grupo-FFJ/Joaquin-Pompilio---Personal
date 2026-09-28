@@ -3,40 +3,56 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { RepositorioPublicaciones } from "./src/RepositorioPublicaciones.js";
 import crearRouterPublicaciones from "./routes/publicaciones.routes.js";
+import { paraExponer, convertirAXML } from "./src/formatos.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// Instancia del repositorio
-const repositorio = new RepositorioPublicaciones();
+const RUTA_DATOS = path.join(__dirname, "data", "publicaciones.json");
+const repositorio = new RepositorioPublicaciones(RUTA_DATOS);
+await repositorio.cargar(); // PASO 8D: cargar antes de escuchar solicitudes
 
-// Datos iniciales de prueba (pasando los datos crudos al repositorio)
-repositorio.agregar(
-  "Lucas",
-  "Perro perdido",
-  "Se busca caniche blanco con collar rojo por la zona céntrica",
-  "aviso"
-);
+// sembrar datos de ejemplo sólo la primera vez
+if (repositorio.listar().length === 0) {
+  await repositorio.agregar(
+    "Lucas",
+    "Perro perdido",
+    "Se busca caniche blanco con collar rojo por la zona céntrica",
+    "aviso"
+  );
 
-repositorio.agregar(
-  "Lucas",
-  "Gato encontrado",
-  "Gato persa encontrado merodeando cerca de la plaza principal",
-  "aviso"
-);
+  await repositorio.agregar(
+    "Lucas",
+    "Gato encontrado",
+    "Gato persa encontrado merodeando cerca de la plaza principal",
+    "aviso"
+  );
 
-const pub3 = repositorio.agregar(
-  "Lucas",
-  "Bici vieja rodado 26",
-  "Bicicleta usada para reparar, necesita cambio de cubiertas",
-  "compraventa"
-);
+  const pub3 = await repositorio.agregar(
+    "Lucas",
+    "Bici vieja rodado 26",
+    "Bicicleta usada para reparar, necesita cambio de cubiertas",
+    "compraventa"
+  );
 
-pub3.activa = false;
+  pub3.activa = false;
+  await repositorio.guardar(); 
+}
 
 // Middlewares
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: false }));
+app.get("/datos/publicaciones.json", (req, res) => {
+  // PASO 4A: res.json(...) — Express arma el Content-Type application/json solo
+  const publicaciones = repositorio.listar(); // o repositorio.publicaciones según tu Repositorio
+  res.json(publicaciones.map(paraExponer));
+});
+
+app.get("/datos/publicaciones.xml", (req, res) => {
+  // PASO 4B: res.type("application/xml").send(...)
+  const publicaciones = repositorio.listar(); // o repositorio.publicaciones según tu Repositorio
+  res.type("application/xml").send(convertirAXML(publicaciones));
+});
 
 // PASO 5C: Montar router de publicaciones
 app.use("/publicaciones", crearRouterPublicaciones(repositorio));

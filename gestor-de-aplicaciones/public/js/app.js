@@ -239,4 +239,52 @@ if (formulario) {
       }
     }
   });
+
+
+function mostrarDiagnostico(publicaciones) {
+  const lista = document.querySelector("#lista-diagnostico") || document.querySelector("#lista-publicaciones");
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  publicaciones.forEach((pub) => {
+    const li = document.createElement("li");
+    const titulo = pub.titulo || "";
+    const autor = pub.autor || "";
+    const categoria = pub.categoria ? ` (${pub.categoria})` : "";
+    const descripcion = pub.descripcion || "";
+
+    li.textContent = `${titulo} - ${autor}${categoria}: ${descripcion}`;
+    lista.appendChild(li);
+  });
+}
+
+document.querySelector("#ver-json").addEventListener("click", async () => {
+  const texto = await fetch("/datos/publicaciones.json").then((r) => r.text());
+  const pre = document.querySelector("#texto-crudo");
+  if (pre) pre.textContent = texto;
+
+  const publicaciones = JSON.parse(texto);
+  mostrarDiagnostico(publicaciones);
+});
+
+document.querySelector("#ver-xml").addEventListener("click", async () => {
+  const texto = await fetch("/datos/publicaciones.xml").then((r) => r.text());
+  const pre = document.querySelector("#texto-crudo");
+  if (pre) pre.textContent = texto;
+
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(texto, "application/xml");
+
+  const publicaciones = Array.from(xml.querySelectorAll("publicacion")).map((nodo) => ({
+    id: nodo.getAttribute("id"),
+    titulo: nodo.querySelector("titulo")?.textContent || "",
+    autor: nodo.querySelector("autor")?.textContent || "",
+    descripcion: nodo.querySelector("descripcion")?.textContent || "",
+    categoria: nodo.querySelector("categoria")?.textContent || "",
+    etiquetas: nodo.querySelector("etiquetas")?.textContent || ""
+  }));
+
+  mostrarDiagnostico(publicaciones);
+});
 }
