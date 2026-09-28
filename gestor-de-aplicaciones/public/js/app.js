@@ -1,0 +1,290 @@
+// --- 1. Elementos del DOM ---
+const vistaPrevia = document.getElementById("vista-previa");
+const titulo = document.getElementById("titulo");
+const autor = document.getElementById("autor");
+const email = document.getElementById("email");
+const tipo = document.getElementById("tipo");
+const descripcion = document.getElementById("descripcion");
+const camposEspecificos = document.getElementById("campos-especificos");
+const ayudaEmail = document.getElementById("ayuda-email");
+const formulario = document.getElementById("form-publicacion");
+const errorTitulo = document.getElementById("error-titulo");
+const errorAutor = document.getElementById("error-autor");
+const salida = document.getElementById("salida");
+const enviar = formulario ? formulario.querySelector("button") : null;
+const listaPublicaciones = document.getElementById("lista-publicaciones");
+
+// Elementos nuevos de la Clase 15
+const botonConsultar = document.querySelector("#consultar");
+const parrafoEstado = document.querySelector("#estado-comunidad");
+const botonInactivas = document.querySelector("#consultar-inactivas");
+const parrafoEstadoComunidad = document.querySelector("#estado-inactivas");
+
+// --- 2. Vista previa y validaciones del Cliente ---
+function actualizarVistaPrevia() {
+  if (!vistaPrevia || !titulo || !autor || !tipo) return;
+  const textoTitulo = titulo.value.trim() || "Sin título";
+  const textoAutor = autor.value.trim() || "...";
+  vistaPrevia.textContent = `${textoTitulo} — ${textoAutor} (${tipo.value})`;
+}
+
+function actualizarCamposEspecificos() {
+  if (!camposEspecificos || !tipo) return;
+  if (tipo.value === "venta") {
+    camposEspecificos.innerHTML = `
+      <input id="precio" type="number" placeholder="Precio">
+      <small id="error-precio" class="error"></small>
+      <input id="stock" type="number" value="1">
+    `;
+    const inputPrecio = document.getElementById("precio");
+    if (inputPrecio) {
+      inputPrecio.addEventListener("input", () => validarPrecio(false));
+      inputPrecio.addEventListener("blur", () => validarPrecio(true));
+    }
+  } else {
+    camposEspecificos.innerHTML = `
+      <select id="modalidad">
+        <option>presencial</option>
+        <option>virtual</option>
+      </select>
+      <input id="duracion" type="number" placeholder="Minutos">
+    `;
+  }
+}
+
+function validarTitulo(mostrarError = true) {
+  if (!titulo) return false;
+  const valido = titulo.value.trim().length >= 5;
+  titulo.classList.toggle("valido", valido);
+  titulo.classList.toggle("invalido", !valido && mostrarError);
+  if (errorTitulo) {
+    errorTitulo.textContent =
+      !valido && mostrarError ? "Ingrese al menos 5 caracteres" : "";
+  }
+  return valido;
+}
+
+function validarAutor(mostrarError = true) {
+  if (!autor) return false;
+  const valido = autor.value.trim().length >= 3;
+  autor.classList.toggle("valido", valido);
+  autor.classList.toggle("invalido", !valido && mostrarError);
+  if (errorAutor) {
+    errorAutor.textContent =
+      !valido && mostrarError ? "Ingrese al menos 3 caracteres" : "";
+  }
+  return valido;
+}
+
+function validarPrecio(mostrarError = true) {
+  const inputPrecio = document.getElementById("precio");
+  const errorPrecio = document.getElementById("error-precio");
+  if (!inputPrecio) return true;
+
+  const valor = Number(inputPrecio.value);
+  const valido = valor > 0 && !isNaN(valor);
+  inputPrecio.classList.toggle("valido", valido);
+  inputPrecio.classList.toggle("invalido", !valido && mostrarError);
+  if (errorPrecio) {
+    errorPrecio.textContent =
+      !valido && mostrarError ? "El precio debe ser mayor a 0" : "";
+  }
+  return valido;
+}
+
+function formularioValido() {
+  const inputPrecio = document.getElementById("precio");
+  const precioValido =
+    tipo?.value !== "venta" || (inputPrecio && Number(inputPrecio.value) > 0);
+  return (
+    titulo?.value.trim().length >= 5 &&
+    autor?.value.trim().length >= 3 &&
+    precioValido
+  );
+}
+
+function actualizarEstadoFormulario() {
+  if (enviar) {
+    enviar.disabled = !formularioValido();
+  }
+}
+
+// Listeners de UI
+if (titulo && autor && tipo) {
+  [titulo, autor, tipo].forEach((control) =>
+    control.addEventListener("input", actualizarVistaPrevia)
+  );
+  tipo.addEventListener("change", () => {
+    actualizarCamposEspecificos();
+    actualizarVistaPrevia();
+    actualizarEstadoFormulario();
+  });
+  titulo.addEventListener("input", () => {
+    validarTitulo(false);
+    actualizarEstadoFormulario();
+  });
+  titulo.addEventListener("blur", () => validarTitulo(true));
+  autor.addEventListener("input", () => {
+    validarAutor(false);
+    actualizarEstadoFormulario();
+  });
+  autor.addEventListener("blur", () => validarAutor(true));
+  actualizarCamposEspecificos();
+  actualizarEstadoFormulario();
+}
+
+// --- 3. Consultas al Servidor (TP 15) ---
+if (botonConsultar && parrafoEstado) {
+  botonConsultar.addEventListener("click", async () => {
+    parrafoEstado.textContent = "Consultando...";
+    try {
+      const respuesta = await fetch("/estado-comunidad");
+      if (!respuesta.ok) throw new Error("La respuesta no fue exitosa");
+      const texto = await respuesta.text();
+      parrafoEstado.textContent = texto;
+    } catch (error) {
+      parrafoEstado.textContent = `No se pudo consultar el estado: ${error.message}`;
+    }
+  });
+}
+
+if (botonInactivas) {
+  botonInactivas.addEventListener("click", async () => {
+    parrafoEstadoComunidad.textContent = "Consultando...";
+    try {
+      const respuesta = await fetch("/estado-inactivas");
+      if (!respuesta.ok) throw new Error("La respuesta no fue exitosa");
+      const texto = await respuesta.text();
+      parrafoEstadoComunidad.textContent = texto;
+    } catch (error) {
+      parrafoEstadoComunidad.textContent = `No se pudo consultar el estado: ${error.message}`;
+    }
+  });
+}
+
+// --- 4. Renderizado dinámico de publicaciones (TP 17 - Pasos 5D y 5E) ---
+async function cargarPublicaciones() {
+  try {
+    const respuesta = await fetch("/publicaciones");
+    if (!respuesta.ok) throw new Error("Error al obtener publicaciones");
+
+    const publicaciones = await respuesta.json();
+
+    listaPublicaciones.innerHTML = "";
+    const ul = document.createElement("ul");
+
+    publicaciones.forEach((pub) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${pub.titulo} - ${pub.autor} (${pub.categoria}): ${pub.descripcion}</span>
+        <button class="btn-eliminar" data-id="${pub.id}">Eliminar</button>
+      `;
+      ul.appendChild(li);
+    });
+
+    listaPublicaciones.appendChild(ul);
+  } catch (error) {
+    console.error("Error al cargar publicaciones:", error);
+  }
+}
+
+// Delegación de eventos para capturar el clic en cualquier botón "Eliminar"
+listaPublicaciones.addEventListener("click", async (evento) => {
+  if (evento.target.matches(".btn-eliminar")) {
+    const id = evento.target.dataset.id;
+    try {
+      const respuesta = await fetch(`/publicaciones/${id}`, {
+        method: "DELETE",
+      });
+
+      if (respuesta.ok) {
+        await cargarPublicaciones(); // Refresca la lista
+      } else {
+        alert("No se pudo eliminar la publicación");
+      }
+    } catch (error) {
+      console.error("Error en la eliminación:", error);
+    }
+  }
+});
+
+// Carga inicial
+cargarPublicaciones();
+
+// Único listener de envío de formulario
+if (formulario) {
+  formulario.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    try {
+      const respuesta = await fetch(formulario.action, {
+        method: formulario.method,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(formulario)),
+      });
+
+      if (salida) {
+        salida.textContent = await respuesta.text();
+        salida.dataset.tipo = respuesta.ok ? "exito" : "error";
+      }
+
+      if (respuesta.ok) {
+        formulario.reset();
+        await cargarPublicaciones(); // Refresca la lista una sola vez
+      }
+    } catch (error) {
+      if (salida) {
+        salida.textContent = "Error de conexión con el servidor";
+        salida.dataset.tipo = "error";
+      }
+    }
+  });
+
+
+function mostrarDiagnostico(publicaciones) {
+  const lista = document.querySelector("#lista-diagnostico") || document.querySelector("#lista-publicaciones");
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  publicaciones.forEach((pub) => {
+    const li = document.createElement("li");
+    const titulo = pub.titulo || "";
+    const autor = pub.autor || "";
+    const categoria = pub.categoria ? ` (${pub.categoria})` : "";
+    const descripcion = pub.descripcion || "";
+
+    li.textContent = `${titulo} - ${autor}${categoria}: ${descripcion}`;
+    lista.appendChild(li);
+  });
+}
+
+document.querySelector("#ver-json").addEventListener("click", async () => {
+  const texto = await fetch("/datos/publicaciones.json").then((r) => r.text());
+  const pre = document.querySelector("#texto-crudo");
+  if (pre) pre.textContent = texto;
+
+  const publicaciones = JSON.parse(texto);
+  mostrarDiagnostico(publicaciones);
+});
+
+document.querySelector("#ver-xml").addEventListener("click", async () => {
+  const texto = await fetch("/datos/publicaciones.xml").then((r) => r.text());
+  const pre = document.querySelector("#texto-crudo");
+  if (pre) pre.textContent = texto;
+
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(texto, "application/xml");
+
+  const publicaciones = Array.from(xml.querySelectorAll("publicacion")).map((nodo) => ({
+    id: nodo.getAttribute("id"),
+    titulo: nodo.querySelector("titulo")?.textContent || "",
+    autor: nodo.querySelector("autor")?.textContent || "",
+    descripcion: nodo.querySelector("descripcion")?.textContent || "",
+    categoria: nodo.querySelector("categoria")?.textContent || "",
+    etiquetas: nodo.querySelector("etiquetas")?.textContent || ""
+  }));
+
+  mostrarDiagnostico(publicaciones);
+});
+}
